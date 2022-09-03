@@ -2,9 +2,13 @@
 
 ### Acer Aspire A314-22
 
+![Gambar Laptop](Images/Laptopacer.jpg)
+
 __Menggunakan Sistem Operasi Windows (Versi 10)__
 
 ### __Tentang Windows :__
+
+![Gambar Windows](Images/windows.png)
 
 Microsoft Windows atau yang lebih dikenal dengan sebutan Windows saja adalah keluarga sistem operasi yang dikembangkan oleh Microsoft, dengan menggunakan antarmuka pengguna grafis (GUI).
 
@@ -52,7 +56,9 @@ __Menggunakan Processor AMD Athlon Silver 3050U with Radeon Graphics 2.30 GHz__
 
 - ### __Tentang AMD :__
 
-    Advanced Micro Devices, Inc. (AMD) adalah perusahaan semikonduktor multinasional Amerika yang berbasis di Santa Clara, California, yang mengembangkan prosesor komputer dan teknologi terkait untuk bisnis dan pasar konsumen. Meskipun awalnya memproduksi prosesornya sendiri, perusahaan tersebut kemudian mengalihdayakan manufakturnya, sebuah praktik yang dikenal sebagai going fabless, setelah GlobalFoundries dipisahkan pada tahun 2009. Produk utama AMD meliputi mikroprosesor, chipset papan induk, prosesor tertanam dan prosesor grafis untuk peladen, workstation, komputer pribadi, dan aplikasi sistem tertanam.
+![Gambar Processor](Images/amd-symbol.png)
+
+Advanced Micro Devices, Inc. (AMD) adalah perusahaan semikonduktor multinasional Amerika yang berbasis di Santa Clara, California, yang mengembangkan prosesor komputer dan teknologi terkait untuk bisnis dan pasar konsumen. Meskipun awalnya memproduksi prosesornya sendiri, perusahaan tersebut kemudian mengalihdayakan manufakturnya, sebuah praktik yang dikenal sebagai going fabless, setelah GlobalFoundries dipisahkan pada tahun 2009. Produk utama AMD meliputi mikroprosesor, chipset papan induk, prosesor tertanam dan prosesor grafis untuk peladen, workstation, komputer pribadi, dan aplikasi sistem tertanam.
 
 __Software Yang Terinstall :__
 
@@ -73,75 +79,93 @@ __Software Yang Terinstall :__
 
 ### __Macam-macam Hardware :__
 
-1. Mainboard atau Motherboard
+__1. Mainboard atau Motherboard__
 
-    Motherboard adalah bagian komputer yang paling utama karena berisi sistem BIOS (Basic input output system) , pengatur koneksi input-output(chipset), soket prosessor, soket memory (RAM), soket kartu grafis (VGA card) dan soket kartu tambahan (additional cards seperti PCI, ISA). BIOS adalah bagian utama yang mengatur sistem input output pada komputer. Bagian yang termasuk input seperti : Keyboard dan mouse. Bagian yang termasuk output seperti Monitor dan printer.
+![Gambar Laptop](Images/motherboard.jpg)
 
-2. Processor (CPU)
+Motherboard adalah bagian komputer yang paling utama karena berisi sistem BIOS (Basic input output system) , pengatur koneksi input-output(chipset), soket prosessor, soket memory (RAM), soket kartu grafis (VGA card) dan soket kartu tambahan (additional cards seperti PCI, ISA). BIOS adalah bagian utama yang mengatur sistem input output pada komputer. Bagian yang termasuk input seperti : Keyboard dan mouse. Bagian yang termasuk output seperti Monitor dan printer.
 
-    Prosessor adalah otak sentral dari sebuah komputer. Prosessor adalah yang mengerjakan semua perintah yang sudah terprogram dan disimpan dalam harddisk. Dalam prosessor dikenal istilah frekuensi clock, yaitu kecepatan sebuah prosessor untuk mengerjakan perintah program dalam satu detik. Satuan frekuensi Clock dinyatakan dalam Herts (Hz).
+__2. Processor (CPU)__
 
-3. Harddisk (HDD)
+![Gambar Laptop](Images/processor.jpg)
 
-    Harddisk adalah media penyimpanan data permanen, jadi data tidak hilang meskipun listrik sudah dimatikan. Harddisk berisi sebuah cakram magnetik yang mampu menyimpan data. Ukuran harddisk dinyatakan dalam Byte (B), contoh: 160GB (160 milyar byte). Harddisk ditemukan pertama kali oleh Reynold Johnson di tahun 1956. Harddisk pertama berukuran 4.4 MB. Sekarang dikenal dua macam harddisk yaitu ATA dan SATA (Serial ATA). Harddisk ATA mempunyai koneksi 40 pin dan Harddisk SATA hanya mempunyai koneksi 6 pin. Harddisk SATA lebih cepat dari Harddisk ATA, namun jika motherboardnya tidak mendukung koneksi SATA maka kita tidak bisa menggunakan harddisk SATA. Sekarang ukuran Harddisk sudah sangat besar, seperti 500GB, 750GB, dan 1000GB (1 TB – Terra Byte).
+Prosessor adalah otak sentral dari sebuah komputer. Prosessor adalah yang mengerjakan semua perintah yang sudah terprogram dan disimpan dalam harddisk. Dalam prosessor dikenal istilah frekuensi clock, yaitu kecepatan sebuah prosessor untuk mengerjakan perintah program dalam satu detik. Satuan frekuensi Clock dinyatakan dalam Herts (Hz).
 
-4. RAM (Random Access Memory)
+__3. Harddisk (HDD)__
 
-    RAM adalah unit penyimpan data tidak permanen artinya data dalam RAM akan hilang jika listrik mati. Ukuran data RAM dinyatakan dengan Byte (B) dan kecepatan akses RAM dinyatakan dengan Hertz (Hz). Jadi dalam RAM tidak cuma data saja, namun ada parameter lain yaitu kecepatan RAM. Kecepatan RAM harus sesuai dengan spesifikasi soket RAM pada motherboard. Contoh: RAM 512MB PC667 mempunyai ukuran data 512MB dengan kecepatan akses 667 MHz.
+![Gambar Laptop](Images/hdd.jpg)
 
-5. Optical drive (CD / DVD)
+Harddisk adalah media penyimpanan data permanen, jadi data tidak hilang meskipun listrik sudah dimatikan. Harddisk berisi sebuah cakram magnetik yang mampu menyimpan data. Ukuran harddisk dinyatakan dalam Byte (B), contoh: 160GB (160 milyar byte). Harddisk ditemukan pertama kali oleh Reynold Johnson di tahun 1956. Harddisk pertama berukuran 4.4 MB. Sekarang dikenal dua macam harddisk yaitu ATA dan SATA (Serial ATA). Harddisk ATA mempunyai koneksi 40 pin dan Harddisk SATA hanya mempunyai koneksi 6 pin. Harddisk SATA lebih cepat dari Harddisk ATA, namun jika motherboardnya tidak mendukung koneksi SATA maka kita tidak bisa menggunakan harddisk SATA. Sekarang ukuran Harddisk sudah sangat besar, seperti 500GB, 750GB, dan 1000GB (1 TB – Terra Byte).
 
-    Optical Drive adalah alat pembaca untuk media penyimpan data berupa disk DVD / CD. DVD/ CD berupa kepingan cakram optik yang berisi data.
+__4. RAM (Random Access Memory)__
 
-6. Floppy Disk
+![Gambar Laptop](Images/ram.jpg)
 
-    Floppy disk adalah media pembaca untuk disket.Saat ini mungkin disket sudah tidak populer. Namun diakui atau tidak disket turut memajukan dunia komputer selama beberapa dekade. Disket adalah media penyimpan data portabel yang bisa dibawa-bawa. Disket terbuat dari sebuah cakram dari plastik magnetik. Ukuran disket sudah distandarkan, contoh : 1.2M, 1.44M
+RAM adalah unit penyimpan data tidak permanen artinya data dalam RAM akan hilang jika listrik mati. Ukuran data RAM dinyatakan dengan Byte (B) dan kecepatan akses RAM dinyatakan dengan Hertz (Hz). Jadi dalam RAM tidak cuma data saja, namun ada parameter lain yaitu kecepatan RAM. Kecepatan RAM harus sesuai dengan spesifikasi soket RAM pada motherboard. Contoh: RAM 512MB PC667 mempunyai ukuran data 512MB dengan kecepatan akses 667 MHz.
 
-7. VGA CARD (Kartu Grafis)
+__5. Optical drive (CD / DVD)__
 
-    VGA adalah singkatan dari Video Graphics Array. VGA Card berfungsi mengeluarkan output grafis (gambar) untuk ditampilkan pada monitor. Ukuran VGA Card ditentukan dari ukuran RAM nya, semakin besar RAM sebuah VGA Card maka semakin halus gambar yang dihasilkan.
+![Gambar Laptop](Images/ODD.jpg)
 
-8. Sound Card
+Optical Drive adalah alat pembaca untuk media penyimpan data berupa disk DVD / CD. DVD/ CD berupa kepingan cakram optik yang berisi data.
 
-    Sound Card adalah bagian yang mendekode data data digital menjadi sinyal suara. Dengan penemuan soundcard maka perkembangan dunia multimedia pada komputer menjadi makin meluas. Sound Card yang baik mampu menghasilkan suara dengan sampling yang rapat dan halus sehingga suara yang dihasilkan mendekati suara asli / Hi Fi (Hi Fi = High Fidelity) Contoh merk soundcard yang terkenal adalah Creative, Ess, Realtek, Cmedia, dll.
+__6. VGA CARD (Kartu Grafis)__
+
+![Gambar Laptop](Images/vga.jpg)
+
+VGA adalah singkatan dari Video Graphics Array. VGA Card berfungsi mengeluarkan output grafis (gambar) untuk ditampilkan pada monitor. Ukuran VGA Card ditentukan dari ukuran RAM nya, semakin besar RAM sebuah VGA Card maka semakin halus gambar yang dihasilkan.
+
+__7. Sound Card__
+
+![Gambar Laptop](Images/soundcard.jpg)
+
+Sound Card adalah bagian yang mendekode data data digital menjadi sinyal suara. Dengan penemuan soundcard maka perkembangan dunia multimedia pada komputer menjadi makin meluas. Sound Card yang baik mampu menghasilkan suara dengan sampling yang rapat dan halus sehingga suara yang dihasilkan mendekati suara asli / Hi Fi (Hi Fi = High Fidelity) Contoh merk soundcard yang terkenal adalah Creative, Ess, Realtek, Cmedia, dll.
 
 ### __Penyimpanan Menggunakan SSD M.2 512gb__
+
+![Gambar Laptop](Images/SSD-NVMe.jpg)
 
 SSD adalah singkatan dari Solid State Drive. Teknologi ini kini sudah mulai menggantikan Hard Disk Drives (HDD). HDD adalah penyimpanan utama untuk komputer (baik desktop maupun laptop) yang telah ada sejak lama. Daya tarik utamanya adalah kapasitas penyimpanan yang tinggi dan biaya rendah. Solid-state drive (SSD) adalah perangkat penyimpanan generasi baru yang digunakan di komputer. SSD menggantikan hard disk mekanis tradisional dengan menggunakan memori berbasis flash, yang secara signifikan lebih cepat. Teknologi penyimpanan hard disk yang lebih lama berjalan lebih lambat, yang sering kali membuat komputer Anda berjalan lebih lambat dari yang seharusnya. SSD mempercepat komputer secara signifikan karena waktu akses baca yang rendah dan throughput yang cepat.
 <hr>
 
 # Sejarah Perkembangan Komputer
 
-1. Generasi Pertama (1940-1959)
+__1. Generasi Pertama (1940-1959)__
 
-    Generasi pertama dimulai ketika komputer digunakan dalam akademi dan militer, seperti Komputer Atanasoff-Berry dibuat pada tahun 1937 untuk menyelesaikan sistem persamaan linear dan komputer Colossus untuk memecahkan kode rahasia Jerman Nazi. Kemudian, ENIAC yang dibangun pada tahun 1946 menjadi komputer pertama untuk tujuan umum. Ketika komputernya dinyalakan untuk pertama kali, Philadelphia mengalami mati listrik. Komputer generasi ini menggunakan tabung vakum untuk menyimpan data dan ukurannya memakan satu ruangan.
+![Gambar Laptop](Images/Komputergen1.jpg)
 
-    Ciri-ciri :
+Generasi pertama dimulai ketika komputer digunakan dalam akademi dan militer, seperti Komputer Atanasoff-Berry dibuat pada tahun 1937 untuk menyelesaikan sistem persamaan linear dan komputer Colossus untuk memecahkan kode rahasia Jerman Nazi. Kemudian, ENIAC yang dibangun pada tahun 1946 menjadi komputer pertama untuk tujuan umum. Ketika komputernya dinyalakan untuk pertama kali, Philadelphia mengalami mati listrik. Komputer generasi ini menggunakan tabung vakum untuk menyimpan data dan ukurannya memakan satu ruangan.
+
+Ciri-ciri :
     
-    - Program dibuat dalam bahasa mesin.
-    - Menggunakan konsep storage program.
-    - Komponen yang digunakan adalah tabung hampa udara.
-    - Ukuran fisiknya besar, sehingga membutuhkan daya listrik yang besar.
-    - Dapat disimpan di magnetic tape dan magnetic disk.
-    - Contohnya komputer IBM 701 buatan tahun 1953 sebagai komputer komersial berukuran besar dan IBM 705 yang dibuat tahun 1959 untuk industri
+- Program dibuat dalam bahasa mesin.
+- Menggunakan konsep storage program.
+- Komponen yang digunakan adalah tabung hampa udara.
+- Ukuran fisiknya besar, sehingga membutuhkan daya listrik yang besar.
+- Dapat disimpan di magnetic tape dan magnetic disk.
+- Contohnya komputer IBM 701 buatan tahun 1953 sebagai komputer komersial berukuran besar dan IBM 705 yang dibuat tahun 1959 untuk industri
 
-2. Generasi Kedua (1959-1965)
+__2. Generasi Kedua (1959-1965)__
 
-    Generasi kedua dimulai ketika transistor menggatikan tabung vakum. UNIVAC diperkenalkan ke publik tahun 1951 untuk penggunaan komersial. Kemudian, pada tahun 1953, IBM memulai bisnis komputernya dengan merilis IBM 650 dan IBM 700. Berbagai bahasa pemrograman mulai dikembangkan dan komputer mulai memiliki memori dan sistem operasi.
+![Gambar Laptop](Images/Komputergen2.jpg)
 
-    Ciri-ciri:
+Generasi kedua dimulai ketika transistor menggatikan tabung vakum. UNIVAC diperkenalkan ke publik tahun 1951 untuk penggunaan komersial. Kemudian, pada tahun 1953, IBM memulai bisnis komputernya dengan merilis IBM 650 dan IBM 700. Berbagai bahasa pemrograman mulai dikembangkan dan komputer mulai memiliki memori dan sistem operasi.
 
-    - Kapasitas memori utama cukup besar.
-    - Komponen yang digunakan adalah transistor yang jauh lebih kecil dibandingkan tabung hampa udara.
-    - Menggunakan magnetic tape dan magnetic disk yang berbentuk removable disk.
-    - Mempunyai kemampuan proses real-time dan time sharing.
-    - Proses operasinya lebih cepat.
-    - Orientasinya pada aplikasi bisnis dan teknik.
-    - Contohnya komputer PDP-5 dan PDP-8 buatan tahun 1963 sebagai komputer mini komersial pertama. Selain itu ada pula komputer IBM 7070, IBM 1400, NCR 300, dan sebagainya.
+Ciri-ciri:
 
-3. Generasi Ketiga (1965-1970)
+- Kapasitas memori utama cukup besar.
+- Komponen yang digunakan adalah transistor yang jauh lebih kecil dibandingkan tabung hampa udara.
+- Menggunakan magnetic tape dan magnetic disk yang berbentuk removable disk.
+- Mempunyai kemampuan proses real-time dan time sharing.
+- Proses operasinya lebih cepat.
+- Orientasinya pada aplikasi bisnis dan teknik.
+- Contohnya komputer PDP-5 dan PDP-8 buatan tahun 1963 sebagai komputer mini komersial pertama. Selain itu ada pula komputer IBM 7070, IBM 1400, NCR 300, dan sebagainya.
 
-   Generasi ketiga dimulai ketika teknologi transistor meningkat menjadi sirkuit terpadu. Komputer mini adalah inovasi yang signifikan dalam generasi ini dan mempengaruhi generasi komputer selanjutnya. NASA menggunakan komputer generasi ini untuk melancarkan Program Apollo, seperti Komputer Bimbingan Apollo untuk mempermudah kendali Apollo Command/Service Module. Digital Equipment Corporation menjadi perusahaan komputer nomor dua di belakang IBM dengan komputer PDP dan VAX-nya. Komputer ini membawa ke pengembangan sistem operasi yang berpengaruh, Unix.
+__3. Generasi Ketiga (1965-1970)__
+
+![Gambar Laptop](Images/Komputergen3.jpg)
+
+Generasi ketiga dimulai ketika teknologi transistor meningkat menjadi sirkuit terpadu. Komputer mini adalah inovasi yang signifikan dalam generasi ini dan mempengaruhi generasi komputer selanjutnya. NASA menggunakan komputer generasi ini untuk melancarkan Program Apollo, seperti Komputer Bimbingan Apollo untuk mempermudah kendali Apollo Command/Service Module. Digital Equipment Corporation menjadi perusahaan komputer nomor dua di belakang IBM dengan komputer PDP dan VAX-nya. Komputer ini membawa ke pengembangan sistem operasi yang berpengaruh, Unix.
 
    Ciri-ciri :
 
@@ -154,9 +178,11 @@ SSD adalah singkatan dari Solid State Drive. Teknologi ini kini sudah mulai meng
    - Dapat melakukan komunikasi data dari satu komputer dengan komputer lainnya.
    - Contohnya komputer IBM S/30. NOVA, CDC 3000, PDP-11, dan sebagainya.
 
-4. Generasi Keempat (dimulai tahun 1970)
+__4. Generasi Keempat (dimulai tahun 1970)__
 
-   Generasi keempat dimulai pada dasawarsa 1970-an ketika penemuan MOSFET dan integrasi berskala besar selanjutnya membawa ke pengembangan mikroprosesor di awal 1970-an. komputer pribadi yang semakin kecil berkat mikroprosesor mulai berkembang, dimulai dari komputer rumahan dan komputer meja. Teknologi selanjutnya adalah laptop dan ponsel cerdas yang sangat fenomenal, membawa berbagai perusahaan teknologi ke dalam perang paten atas ponsel cerdas.
+![Gambar Laptop](Images/Komputergen4.jpg)
+
+Generasi keempat dimulai pada dasawarsa 1970-an ketika penemuan MOSFET dan integrasi berskala besar selanjutnya membawa ke pengembangan mikroprosesor di awal 1970-an. komputer pribadi yang semakin kecil berkat mikroprosesor mulai berkembang, dimulai dari komputer rumahan dan komputer meja. Teknologi selanjutnya adalah laptop dan ponsel cerdas yang sangat fenomenal, membawa berbagai perusahaan teknologi ke dalam perang paten atas ponsel cerdas.
 
    Ciri-ciri :
 
@@ -166,9 +192,11 @@ SSD adalah singkatan dari Solid State Drive. Teknologi ini kini sudah mulai meng
    - Personal computer atau PC mulai berkembang sejak tahun 1977. Contohnya komputer Apple II dan komputer dekstop oleh Xerox Corporation.
    - Pada tahun 1981, komputer mulai banyak menggunakan sistem Window dan mouse.
 
-5. Generasi Kelima
+__5. Generasi Kelima__
 
-   Generasi kelima digadang-gadang sebagai tahapan perkembangan teknologi paling canggih saat ini dan diciptakan pertama kali pada tahun 1980-an. Peningkatan dari segi visualisasi, menjadikan tampilan visual pada komputer di generasi kelima mempunyai resolusi sangat tinggi dan begitu tajam. Negara yang mempelopori sejarah perkembangan komputer pada generasi kelima adalah Jepang. Dalam proses pengembangannya, terdapat penambahan komponen-komponen penting ke dalam sistem komputer modern saat ini. Hal ini dikarenakan komponen yang digunakan pada komputer generasi kelima adalah menerapkan ragam teknologi modern, seperti superkonduktor, ULSI, dan kecerdasan buatan (atau kalian lebih mengenalnya dengan sebutan Artificial Intelligence).
+![Gambar Laptop](Images/Komputergen5.jpg)
+
+Generasi kelima digadang-gadang sebagai tahapan perkembangan teknologi paling canggih saat ini dan diciptakan pertama kali pada tahun 1980-an. Peningkatan dari segi visualisasi, menjadikan tampilan visual pada komputer di generasi kelima mempunyai resolusi sangat tinggi dan begitu tajam. Negara yang mempelopori sejarah perkembangan komputer pada generasi kelima adalah Jepang. Dalam proses pengembangannya, terdapat penambahan komponen-komponen penting ke dalam sistem komputer modern saat ini. Hal ini dikarenakan komponen yang digunakan pada komputer generasi kelima adalah menerapkan ragam teknologi modern, seperti superkonduktor, ULSI, dan kecerdasan buatan (atau kalian lebih mengenalnya dengan sebutan Artificial Intelligence).
 
    Ciri-ciri :
 
