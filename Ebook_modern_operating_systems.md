@@ -746,5 +746,368 @@ polygons in graphics applications. They are not so good at serial tasks. They ar
 also hard to program. While GPUs can be useful for operating systems (e.g., encryption or processing of network traffic), it is not likely that much of the operating
 system itself will run on the GPUs.</p>
 
-<p align="center"><img width="550" src="images_ebook/figure1_6.png"></p>
+<p align="center"><img width="550" src="images_ebook/figure1_8.png"></p>
 
+#### __1.3.2 Memory__
+
+<p align="justify"; style="text-indent: 3em;">The second major component in any computer is the memory. Ideally, a memory should be extremely fast (faster than executing an instruction so that the CPU is
+not held up by the memory), abundantly large, and dirt cheap. No current technology satisfies all of these goals, so a different approach is taken. The memory system is constructed as a hierarchy of layers, as shown in Fig. 1-9. The top layers
+have higher speed, smaller capacity, and greater cost per bit than the lower ones,
+often by factors of a billion or more.</p>
+
+<p align="justify"; style="text-indent: 3em;">The top layer consists of the registers internal to the CPU. They are made of the same material as the CPU and are thus just as fast as the CPU. Consequently,
+there is no delay in accessing them. The storage capacity available in them is typically 32 × 32 bits on a 32-bit CPU and 64 × 64 bits on a 64-bit CPU. Less than
+1 KB in both cases. Programs must manage the registers (i.e., decide what to keep
+in them) themselves, in software.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_9.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Next comes the cache memory, which is mostly controlled by the hardware.
+Main memory is divided up into cache lines, typically 64 bytes, with addresses 0
+to 63 in <b>cache line</b> 0, 64 to 127 in cache line 1, and so on. The most heavily used
+cache lines are kept in a high-speed cache located inside or very close to the CPU.
+When the program needs to read a memory word, the cache hardware checks to see
+if the line needed is in the cache. If it is, called a <b>cache hit</b>, the request is satisfied
+from the cache and no memory request is sent over the bus to the main memory.
+Cache hits normally take about two clock cycles. Cache misses have to go to
+memory, with a substantial time penalty. Cache memory is limited in size due to its
+high cost. Some machines have two or even three levels of cache, each one slower
+and bigger than the one before it.</p>
+
+<p align="justify"; style="text-indent: 3em;">Caching plays a major role in many areas of computer science, not just caching
+lines of RAM. Whenever a resource can be divided into pieces, some of which are
+used much more heavily than others, caching is often used to improve performance. Operating systems use it all the time. For example, most operating systems
+keep (pieces of) heavily used files in main memory to avoid having to fetch them
+from the disk repeatedly. Similarly, the results of converting long path names like</p>
+
+<i>/home/ast/projects/minix3/src/kernel/clock.c</i>
+
+<p>into the disk address where the file is located can be cached to avoid repeated
+lookups. Finally, when the address of a Web page (URL) is converted to a network
+address (IP address), the result can be cached for future use. Many other uses exist.</p>
+
+<p align="justify"; style="text-indent: 3em;">In any caching system, several questions come up fairly soon, including:</p>
+1. When to put a new item into the cache.
+2. Which cache line to put the new item in.
+3. Which item to remove from the cache when a slot is needed.
+4. Where to put a newly evicted item in the larger memory.
+
+<p align="justify"; style="text-indent: 3em;">Not every question is relevant to every caching situation. For caching lines of main
+memory in the CPU cache, a new item will generally be entered on every cache
+miss. The cache line to use is generally computed by using some of the high-order
+bits of the memory address referenced. For example, with 4096 cache lines of 64
+bytes and 32 bit addresses, bits 6 through 17 might be used to specify the cache
+line, with bits 0 to 5 the byte within the cache line. In this case, the item to remove
+is the same one as the new data goes into, but in other systems it might not be.
+Finally, when a cache line is rewritten to main memory (if it has been modified
+since it was cached), the place in memory to rewrite it to is uniquely determined by
+the address in question.</p>
+
+<p align="justify"; style="text-indent: 3em;">Caches are such a good idea that modern CPUs have two of them. The first
+level or <b>L1 cache</b> is always inside the CPU and usually feeds decoded instructions
+into the CPU’s execution engine. Most chips have a second L1 cache for very
+heavily used data words. The L1 caches are typically 16 KB each. In addition,
+there is often a second cache, called the <b>L2 cache</b>, that holds several megabytes of
+recently used memory words. The difference between the L1 and L2 caches lies in
+the timing. Access to the L1 cache is done without any delay, whereas access to
+the L2 cache involves a delay of one or two clock cycles.</p>
+
+<p align="justify"; style="text-indent: 3em;">Caches are such a good idea that modern CPUs have two of them. The first
+level or L1 cache is always inside the CPU and usually feeds decoded instructions
+into the CPU’s execution engine. Most chips have a second L1 cache for very
+heavily used data words. The L1 caches are typically 16 KB each. In addition,
+there is often a second cache, called the L2 cache, that holds several megabytes of
+recently used memory words. The difference between the L1 and L2 caches lies in
+the timing. Access to the L1 cache is done without any delay, whereas access to
+the L2 cache involves a delay of one or two clock cycles.</p>
+
+<p align="justify"; style="text-indent: 3em;">Main memory comes next in the hierarchy of Fig. 1-9. This is the workhorse
+of the memory system. Main memory is usually called <b>RAM (Random Access
+Memory)</b>. Old-timers sometimes call it <b>core memory</b>, because computers in the
+1950s and 1960s used tiny magnetizable ferrite cores for main memory. They hav e
+been gone for decades but the name persists. Currently, memories are hundreds of
+megabytes to several gigabytes and growing rapidly. All CPU requests that cannot
+be satisfied out of the cache go to main memory.</p>
+
+<p align="justify"; style="text-indent: 3em;">In addition to the main memory, many computers have a small amount of nonvolatile random-access memory. Unlike RAM, nonvolatile memory does not lose
+its contents when the power is switched off. <b>ROM (Read Only Memory)</b> is programmed at the factory and cannot be changed afterward. It is fast and inexpensive. On some computers, the bootstrap loader used to start the computer is contained in ROM. Also, some I/O cards come with ROM for handling low-level device control.</p>
+
+<p align="justify"; style="text-indent: 3em;"><b>EEPROM (Electrically Erasable PROM)</b> and <b>flash memory</b> are also nonvolatile, but in contrast to ROM can be erased and rewritten. However, writing
+them takes orders of magnitude more time than writing RAM, so they are used in
+the same way ROM is, only with the additional feature that it is now possible to
+correct bugs in programs they hold by rewriting them in the field.</p>
+
+<p align="justify"; style="text-indent: 3em;">Flash memory is also commonly used as the storage medium in portable electronic devices. It serves as film in digital cameras and as the disk in portable music
+players, to name just two uses. Flash memory is intermediate in speed between
+RAM and disk. Also, unlike disk memory, if it is erased too many times, it wears
+out.</p>
+
+<p align="justify"; style="text-indent: 3em;">Yet another kind of memory is CMOS, which is volatile. Many computers use
+CMOS memory to hold the current time and date. The CMOS memory and the
+clock circuit that increments the time in it are powered by a small battery, so the
+time is correctly updated, even when the computer is unplugged. The CMOS memory can also hold the configuration parameters, such as which disk to boot from.
+CMOS is used because it draws so little power that the original factory-installed
+battery often lasts for several years. However, when it begins to fail, the computer
+can appear to have Alzheimer’s disease, forgetting things that it has known for
+years, like which hard disk to boot from.</p>
+
+
+#### __1.3.3 Disk__
+
+<p align="justify"; style="text-indent: 3em;">Next in the hierarchy is magnetic disk (hard disk). Disk storage is two orders
+of magnitude cheaper than RAM per bit and often two orders of magnitude larger
+as well. The only problem is that the time to randomly access data on it is close to
+three orders of magnitude slower. The reason is that a disk is a mechanical device,
+as shown in Fig. 1-10.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_10.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">A disk consists of one or more metal platters that rotate at 5400, 7200, 10,800 RPM or more. A mechanical arm pivots over the platters from the corner, similar
+to the pickup arm on an old 33-RPM phonograph for playing vinyl records. Information is written onto the disk in a series of concentric circles. At any giv en
+arm position, each of the heads can read an annular region called a <b>track</b>. Together, all the tracks for a given arm position form a <b>cylinder</b>.</p>
+
+<p align="justify"; style="text-indent: 3em;">Each track is divided into some number of sectors, typically 512 bytes per sector. On modern disks, the outer cylinders contain more sectors than the inner ones.
+Moving the arm from one cylinder to the next takes about 1 msec. Moving it to a
+random cylinder typically takes 5 to 10 msec, depending on the drive. Once the
+arm is on the correct track, the drive must wait for the needed sector to rotate under
+the head, an additional delay of 5 msec to 10 msec, depending on the drive’s RPM.
+Once the sector is under the head, reading or writing occurs at a rate of 50 MB/sec
+on low-end disks to 160 MB/sec on faster ones.</p>
+
+<p align="justify"; style="text-indent: 3em;">Sometimes you will hear people talk about disks that are really not disks at all,
+like <b>SSDs, (Solid State Disks)</b>. SSDs do not have moving parts, do not contain
+platters in the shape of disks, and store data in (Flash) memory. The only ways in
+which they resemble disks is that they also store a lot of data which is not lost
+when the power is off.</p>
+
+<p align="justify"; style="text-indent: 3em;">Many computers support a scheme known as <b>virtual memory</b>, which we will
+discuss at some length in Chap. 3. This scheme makes it possible to run programs
+larger than physical memory by placing them on the disk and using main memory
+as a kind of cache for the most heavily executed parts. This scheme requires remapping memory addresses on the fly to convert the address the program generated to the physical address in RAM where the word is located. This mapping is
+done by a part of the CPU called the <b>MMU (Memory Management Unit)</b>, as
+shown in Fig. 1-6.</p>
+
+<p align="justify"; style="text-indent: 3em;">The presence of caching and the MMU can have a major impact on performance. In a multiprogramming system, when switching from one program to
+another, sometimes called a <b>context switch</b>, it may be necessary to flush all modiied blocks from the cache and change the mapping registers in the MMU. Both of
+these are expensive operations, and programmers try hard to avoid them. We will
+see some of the implications of their tactics later.</p>
+
+#### __1.3.4 I/O Devices__
+
+<p align="justify"; style="text-indent: 3em;">The CPU and memory are not the only resources that the operating system
+must manage. I/O devices also interact heavily with the operating system. As we
+saw in Fig. 1-6, I/O devices generally consist of two parts: a controller and the device itself. The controller is a chip or a set of chips that physically controls the device. It accepts commands from the operating system, for example, to read data
+from the device, and carries them out.</p>
+
+<p align="justify"; style="text-indent: 3em;">In many cases, the actual control of the device is complicated and detailed, so
+it is the job of the controller to present a simpler (but still very complex) interface
+to the operating system. For example, a disk controller might accept a command to read sector 11,206 from disk 2. The controller then has to convert this linear sector
+number to a cylinder, sector, and head. This conversion may be complicated by the
+fact that outer cylinders have more sectors than inner ones and that some bad sectors have been remapped onto other ones. Then the controller has to determine
+which cylinder the disk arm is on and give it a command to move in or out the requisite number of cylinders. It has to wait until the proper sector has rotated under
+the head and then start reading and storing the bits as they come off the drive,
+removing the preamble and computing the checksum. Finally, it has to assemble
+the incoming bits into words and store them in memory. To do all this work, controllers often contain small embedded computers that are programmed to do their
+work.</p>
+
+<p align="justify"; style="text-indent: 3em;">The other piece is the actual device itself. Devices have fairly simple interfaces, both because they cannot do much and to make them standard. The latter is
+needed so that any SATA disk controller can handle any SATA disk, for example.
+<b>SATA</b> stands for <b>Serial ATA</b> and <b>ATA</b> in turn stands for <b>AT Attachment</b>. In case
+you are curious what AT stands for, this was IBM’s second generation ‘‘Personal
+Computer Advanced Technology’’ built around the then-extremely-potent 6-MHz
+80286 processor that the company introduced in 1984. What we learn from this is
+that the computer industry has a habit of continuously enhancing existing acronyms with new prefixes and suffixes. We also learned that an adjective like ‘‘advanced’’ should be used with great care, or you will look silly thirty years down the
+line.</p>
+
+<p align="justify"; style="text-indent: 3em;">SATA is currently the standard type of disk on many computers. Since the actual device interface is hidden behind the controller, all that the operating system
+sees is the interface to the controller, which may be quite different from the interface to the device.</p>
+
+<p align="justify"; style="text-indent: 3em;">Because each type of controller is different, different software is needed to
+control each one. The software that talks to a controller, giving it commands and
+accepting responses, is called a <b>device driver. Each controller manufacturer has to</b>
+supply a driver for each operating system it supports. Thus a scanner may come
+with drivers for OS X, Windows 7, Windows 8, and Linux, for example.</p>
+
+<p align="justify"; style="text-indent: 3em;">To be used, the driver has to be put into the operating system so it can run in
+kernel mode. Drivers can actually run outside the kernel, and operating systems
+like Linux and Windows nowadays do offer some support for doing so. The vast
+majority of the drivers still run below the kernel boundary. Only very few current
+systems, such as MINIX 3, run all drivers in user space. Drivers in user space must
+be allowed to access the device in a controlled way, which is not straightforward.</p>
+
+<p align="justify"; style="text-indent: 3em;">There are three ways the driver can be put into the kernel. The first way is to
+relink the kernel with the new driver and then reboot the system. Many older UNIX
+systems work like this. The second way is to make an entry in an operating system
+file telling it that it needs the driver and then reboot the system. At boot time, the
+operating system goes and finds the drivers it needs and loads them. Windows
+works this way. The third way is for the operating system to be able to accept new drivers while running and install them on the fly without the need to reboot. This
+way used to be rare but is becoming much more common now. Hot-pluggable
+devices, such as USB and IEEE 1394 devices (discussed below), always need dynamically loaded drivers.</p>
+
+<p align="justify"; style="text-indent: 3em;">Every controller has a small number of registers that are used to communicate
+with it. For example, a minimal disk controller might have registers for specifying
+the disk address, memory address, sector count, and direction (read or write). To
+activate the controller, the driver gets a command from the operating system, then
+translates it into the appropriate values to write into the device registers. The collection of all the device registers forms the <b>I/O port space</b>, a subject we will come
+back to in Chap. 5.</p>
+
+<p align="justify"; style="text-indent: 3em;">On some computers, the device registers are mapped into the operating system’s address space (the addresses it can use), so they can be read and written like
+ordinary memory words. On such computers, no special I/O instructions are required and user programs can be kept away from the hardware by not putting these
+memory addresses within their reach (e.g., by using base and limit registers). On
+other computers, the device registers are put in a special I/O port space, with each
+register having a port address. On these machines, special IN and OUT instructions
+are available in kernel mode to allow drivers to read and write the registers. The
+former scheme eliminates the need for special I/O instructions but uses up some of
+the address space. The latter uses no address space but requires special instructions. Both systems are widely used.</p>
+
+<p align="justify"; style="text-indent: 3em;">Input and output can be done in three different ways. In the simplest method, a
+user program issues a system call, which the kernel then translates into a procedure
+call to the appropriate driver. The driver then starts the I/O and sits in a tight loop
+continuously polling the device to see if it is done (usually there is some bit that indicates that the device is still busy). When the I/O has completed, the driver puts
+the data (if any) where they are needed and returns. The operating system then returns control to the caller. This method is called <b>busy waiting</b> and has the disadvantage of tying up the CPU polling the device until it is finished.</p>
+
+<p align="justify"; style="text-indent: 3em;">The second method is for the driver to start the device and ask it to give an interrupt when it is finished. At that point the driver returns. The operating system
+then blocks the caller if need be and looks for other work to do. When the controller detects the end of the transfer, it generates an <b>interrupt</b> to signal completion.</p>
+
+<p align="justify"; style="text-indent: 3em;">Interrupts are very important in operating systems, so let us examine the idea
+more closely. In Fig. 1-11(a) we see a three-step process for I/O. In step 1, the
+driver tells the controller what to do by writing into its device registers. The controller then starts the device. When the controller has finished reading or writing
+the number of bytes it has been told to transfer, it signals the interrupt controller
+chip using certain bus lines in step 2. If the interrupt controller is ready to accept
+the interrupt (which it may not be if it is busy handling a higher-priority one), it asserts a pin on the CPU chip telling it, in step 3. In step 4, the interrupt controller puts the number of the device on the bus so the CPU can read it and know which
+device has just finished (many devices may be running at the same time).</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_11.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Once the CPU has decided to take the interrupt, the program counter and PSW
+are typically then pushed onto the current stack and the CPU switched into kernel
+mode. The device number may be used as an index into part of memory to find the
+address of the interrupt handler for this device. This part of memory is called the
+<b>interrupt vector</b>. Once the interrupt handler (part of the driver for the interrupting
+device) has started, it removes the stacked program counter and PSW and saves
+them, then queries the device to learn its status. When the handler is all finished, it
+returns to the previously running user program to the first instruction that was not
+yet executed. These steps are shown in Fig. 1-11(b).</p>
+
+<p align="justify"; style="text-indent: 3em;">The third method for doing I/O makes use of special hardware: a <b>DMA
+(Direct Memory Access)</b> chip that can control the flow of bits between memory
+and some controller without constant CPU intervention. The CPU sets up the
+DMA chip, telling it how many bytes to transfer, the device and memory addresses
+involved, and the direction, and lets it go. When the DMA chip is done, it causes
+an interrupt, which is handled as described above. DMA and I/O hardware in general will be discussed in more detail in Chap. 5.</p>
+
+<p align="justify"; style="text-indent: 3em;">Interrupts can (and often do) happen at highly inconvenient moments, for example, while another interrupt handler is running. For this reason, the CPU has a
+way to disable interrupts and then reenable them later. While interrupts are disabled, any devices that finish continue to assert their interrupt signals, but the CPU
+is not interrupted until interrupts are enabled again. If multiple devices finish
+while interrupts are disabled, the interrupt controller decides which one to let
+through first, usually based on static priorities assigned to each device. The
+highest-priority device wins and gets to be serviced first. The others must wait.</p>
+
+#### __1.3.5 Buses__
+
+<p align="justify"; style="text-indent: 3em;">The organization of Fig. 1-6 was used on minicomputers for years and also on
+the original IBM PC. However, as processors and memories got faster, the ability
+of a single bus (and certainly the IBM PC bus) to handle all the traffic was strained
+to the breaking point. Something had to give. As a result, additional buses were
+added, both for faster I/O devices and for CPU-to-memory traffic. As a consequence of this evolution, a large x86 system currently looks something like
+Fig. 1-12.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_12.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">This system has many buses (e.g., cache, memory, PCIe, PCI, USB, SATA, and
+DMI), each with a different transfer rate and function. The operating system must
+be aware of all of them for configuration and management. The main bus is the
+<b>PCIe (Peripheral Component Interconnect Express)</b> bus.</p>
+
+<p align="justify"; style="text-indent: 3em;">The PCIe bus was invented by Intel as a successor to the older <b>PCI</b> bus, which
+in turn was a replacement for the original <b>ISA (Industry Standard Architecture)</b>
+bus. Capable of transferring tens of gigabits per second, PCIe is much faster than
+its predecessors. It is also very different in nature. Up to its creation in 2004, most
+buses were parallel and shared. A <b>shared bus architecture</b> means that multiple devices use the same wires to transfer data. Thus, when multiple devices have data to
+send, you need an arbiter to determine who can use the bus. In contrast, PCIe
+makes use of dedicated, point-to-point connections. A <b>parallel bus architecture</b> as
+used in traditional PCI means that you send each word of data over multiple wires.
+For instance, in regular PCI buses, a single 32-bit number is sent over 32 parallel
+wires. In contrast to this, PCIe uses a <b>serial bus architecture</b> and sends all bits in a message through a single connection, known as a lane, much like a network
+packet. This is much simpler, because you do not have to ensure that all 32 bits
+arrive at the destination at exactly the same time. Parallelism is still used, because
+you can have multiple lanes in parallel. For instance, we may use 32 lanes to carry
+32 messages in parallel. As the speed of peripheral devices like network cards and
+graphics adapters increases rapidly, the PCIe standard is upgraded every 3–5 years.
+For instance, 16 lanes of PCIe 2.0 offer 64 gigabits per second. Upgrading to PCIe
+3.0 will give you twice that speed and PCIe 4.0 will double that again.</p>
+
+<p align="justify"; style="text-indent: 3em;">Meanwhile, we still have many leg acy devices for the older PCI standard. As
+we see in Fig. 1-12, these devices are hooked up to a separate hub processor. In
+the future, when we consider PCI no longer merely old, but ancient, it is possible
+that all PCI devices will attach to yet another hub that in turn connects them to the
+main hub, creating a tree of buses.</p>
+
+<p align="justify"; style="text-indent: 3em;">In this configuration, the CPU talks to memory over a fast DDR3 bus, to an external graphics device over PCIe and to all other devices via a hub over a <b>DMI
+(Direct Media Interface)</b> bus. The hub in turn connects all the other devices,
+using the Universal Serial Bus to talk to USB devices, the SATA bus to interact
+with hard disks and DVD drives, and PCIe to transfer Ethernet frames. We hav e already mentioned the older PCI devices that use a traditional PCI bus.</p>
+
+<p align="justify"; style="text-indent: 3em;">Moreover, each of the cores has a dedicated cache and a much larger cache that
+is shared between them. Each of these caches introduces another bus.</p>
+
+<p align="justify"; style="text-indent: 3em;">The <b>USB (Universal Serial Bus)</b> was invented to attach all the slow I/O devices, such as the keyboard and mouse, to the computer. Howev er, calling a modern USB 3.0 device humming along at 5 Gbps ‘‘slow’’ may not come naturally for
+the generation that grew up with 8-Mbps ISA as the main bus in the first IBM PCs.
+USB uses a small connector with four to eleven wires (depending on the version),
+some of which supply electrical power to the USB devices or connect to ground.
+USB is a centralized bus in which a root device polls all the I/O devices every 1
+msec to see if they hav e any traffic. USB 1.0 could handle an aggregate load of 12
+Mbps, USB 2.0 increased the speed to 480 Mbps, and USB 3.0 tops at no less than
+5 Gbps. Any USB device can be connected to a computer and it will function immediately, without requiring a reboot, something pre-USB devices required, much
+to the consternation of a generation of frustrated users.</p>
+
+<p align="justify"; style="text-indent: 3em;">The <b>SCSI (Small Computer System Interface)</b> bus is a high-performance bus
+intended for fast disks, scanners, and other devices needing considerable bandwidth. Nowadays, we find them mostly in servers and workstations. They can run
+at up to 640 MB/sec.</p>
+
+<p align="justify"; style="text-indent: 3em;">To work in an environment such as that of Fig. 1-12, the operating system has
+to know what peripheral devices are connected to the computer and configure
+them. This requirement led Intel and Microsoft to design a PC system called <b>plug
+and play</b>, based on a similar concept first implemented in the Apple Macintosh.
+Before plug and play, each I/O card had a fixed interrupt request level and fixed addresses for its I/O registers. For example, the keyboard was interrupt 1 and used I/O addresses 0x60 to 0x64, the floppy disk controller was interrupt 6 and used I/O
+addresses 0x3F0 to 0x3F7, and the printer was interrupt 7 and used I/O addresses
+0x378 to 0x37A, and so on.</p>
+
+<p align="justify"; style="text-indent: 3em;">So far, so good. The trouble came in when the user bought a sound card and a
+modem card and both happened to use, say, interrupt 4. They would conflict and
+would not work together. The solution was to include DIP switches or jumpers on
+ev ery I/O card and instruct the user to please set them to select an interrupt level
+and I/O device addresses that did not conflict with any others in the user’s system.
+Teenagers who devoted their lives to the intricacies of the PC hardware could
+sometimes do this without making errors. Unfortunately, nobody else could, leading to chaos.</p>
+
+<p align="justify"; style="text-indent: 3em;">What plug and play does is have the system automatically collect information
+about the I/O devices, centrally assign interrupt levels and I/O addresses, and then
+tell each card what its numbers are. This work is closely related to booting the
+computer, so let us look at that. It is not completely trivial.</p>
+
+#### __1.3.6 Booting The Computer__
+
+<p align="justify"; style="text-indent: 3em;">Very briefly, the boot process is as follows. Every PC contains a parentboard
+(formerly called a motherboard before political correctness hit the computer industry). On the parentboard is a program called the system <b>BIOS (Basic Input Output System)</b>. The BIOS contains low-level I/O software, including procedures to
+read the keyboard, write to the screen, and do disk I/O, among other things. Nowadays, it is held in a flash RAM, which is nonvolatile but which can be updated by
+the operating system when bugs are found in the BIOS.</p>
+
+<p align="justify"; style="text-indent: 3em;">When the computer is booted, the BIOS is started. It first checks to see how
+much RAM is installed and whether the keyboard and other basic devices are installed and responding correctly. It starts out by scanning the PCIe and PCI buses
+to detect all the devices attached to them. If the devices present are different from
+when the system was last booted, the new devices are configured.</p>
+
+<p align="justify"; style="text-indent: 3em;">The BIOS then determines the boot device by trying a list of devices stored in
+the CMOS memory. The user can change this list by entering a BIOS configuration
+program just after booting. Typically, an attempt is made to boot from a CD-ROM
+(or sometimes USB) drive, if one is present. If that fails, the system boots from the
+hard disk. The first sector from the boot device is read into memory and executed.
+This sector contains a program that normally examines the partition table at the
+end of the boot sector to determine which partition is active. Then a secondary boot
+loader is read in from that partition. This loader reads in the operating system
+from the active partition and starts it.</p>
+
+<p align="justify"; style="text-indent: 3em;">The operating system then queries the BIOS to get the configuration information. For each device, it checks to see if it has the device driver. If not, it asks
+the user to insert a CD-ROM containing the driver (supplied by the device’s manufacturer) or to download it from the Internet. Once it has all the device drivers, the operating system loads them into the kernel. Then it initializes its tables, creates
+whatever background processes are needed, and starts up a login program or GUI.</p>
