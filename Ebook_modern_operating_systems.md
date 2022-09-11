@@ -1663,3 +1663,774 @@ thrown out when the context changes (assembly-language programming, monoprogramm
 often a decade later. For this reason in this book we will sometimes look at ideas
 and algorithms that may seem dated on today’s gigabyte PCs, but which may soon
 come back on embedded computers and smart cards.</p>
+
+### __1.6 SYSTEM CALLS
+
+<p align="justify"; style="text-indent: 3em;">We hav e seen that operating systems have two main functions: providing
+abstractions to user programs and managing the computer’s resources. For the most
+part, the interaction between user programs and the operating system deals with the
+former; for example, creating, writing, reading, and deleting files. The resource-management part is largely transparent to the users and done automatically.
+Thus, the interface between user programs and the operating system is primarily
+about dealing with the abstractions. To really understand what operating systems
+do, we must examine this interface closely. The system calls available in the interface vary from one operating system to another (although the underlying concepts
+tend to be similar).</p>
+
+<p align="justify"; style="text-indent: 3em;">We are thus forced to make a choice between (1) vague generalities (‘‘operating systems have system calls for reading files’’) and (2) some specific system
+(‘‘UNIX has a read system call with three parameters: one to specify the file, one
+to tell where the data are to be put, and one to tell how many bytes to read’’).</p>
+
+<p align="justify"; style="text-indent: 3em;">We hav e chosen the latter approach. It’s more work that way, but it gives more
+insight into what operating systems really do. Although this discussion specifically
+refers to POSIX (International Standard 9945-1), hence also to UNIX, System V,
+BSD, Linux, MINIX 3, and so on, most other modern operating systems have system calls that perform the same functions, even if the details differ. Since the actual mechanics of issuing a system call are highly machine dependent and often must
+be expressed in assembly code, a procedure library is provided to make it possible
+to make system calls from C programs and often from other languages as well. mechanics of issuing a system call are highly machine dependent and often must
+be expressed in assembly code, a procedure library is provided to make it possible
+to make system calls from C programs and often from other languages as well.</p>
+
+<p align="justify"; style="text-indent: 3em;">It is useful to keep the following in mind. Any single-CPU computer can execute only one instruction at a time. If a process is running a user program in user
+mode and needs a system service, such as reading data from a file, it has to execute
+a trap instruction to transfer control to the operating system. The operating system
+then figures out what the calling process wants by inspecting the parameters. Then
+it carries out the system call and returns control to the instruction following the
+system call. In a sense, making a system call is like making a special kind of procedure call, only system calls enter the kernel and procedure calls do not.</p>
+
+<p align="justify"; style="text-indent: 3em;">To make the system-call mechanism clearer, let us take a quick look at the read
+system call. As mentioned above, it has three parameters: the first one specifying
+the file, the second one pointing to the buffer, and the third one giving the number
+of bytes to read. Like nearly all system calls, it is invoked from C programs by calling a library procedure with the same name as the system call: read. A call from a
+C program might look like this:</p>
+
+    count = read(fd, buffer, nbytes);
+
+The system call (and the library procedure) return the number of bytes actually
+read in <b>count</b>. This value is normally the same as <b>nbytes</b>, but may be smaller, if,
+for example, end-of-file is encountered while reading.</p>
+
+<p align="justify"; style="text-indent: 3em;">If the system call cannot be carried out owing to an invalid parameter or a disk
+error, <b>count</b> is set to −1, and the error number is put in a global variable, <b>errno</b>.
+Programs should always check the results of a system call to see if an error occurred.</p>
+
+<p align="justify"; style="text-indent: 3em;">System calls are performed in a series of steps. To make this concept clearer,
+let us examine the read call discussed above. In preparation for calling the read library procedure, which actually makes the read system call, the calling program
+first pushes the parameters onto the stack, as shown in steps 1–3 in Fig. 1-17.</p>
+
+<p align="justify"; style="text-indent: 3em;">C and C++ compilers push the parameters onto the stack in reverse order for
+historical reasons (having to do with making the first parameter to <b>printf</b>, the format string, appear on top of the stack). The first and third parameters are called by
+value, but the second parameter is passed by reference, meaning that the address of
+the buffer (indicated by &) is passed, not the contents of the buffer. Then comes the
+actual call to the library procedure (step 4). This instruction is the normal procedure-call instruction used to call all procedures.</p>
+
+<p align="justify"; style="text-indent: 3em;">The library procedure, possibly written in assembly language, typically puts
+the system-call number in a place where the operating system expects it, such as a
+register (step 5). Then it executes a TRAP instruction to switch from user mode to
+kernel mode and start execution at a fixed address within the kernel (step 6). The
+TRAP instruction is actually fairly similar to the procedure-call instruction in the sense that the instruction following it is taken from a distant location and the return
+address is saved on the stack for use later.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_17.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Nevertheless, the TRAP instruction also differs from the procedure-call instruction in two fundamental ways. First, as a side effect, it switches into kernel mode.
+The procedure call instruction does not change the mode. Second, rather than giving a relative or absolute address where the procedure is located, the TRAP instruction cannot jump to an arbitrary address. Depending on the architecture, either it
+jumps to a single fixed location or there is an 8-bit field in the instruction giving
+the index into a table in memory containing jump addresses, or equivalent.</p>
+
+<p align="justify"; style="text-indent: 3em;">The kernel code that starts following the TRAP examines the system-call number and then dispatches to the correct system-call handler, usually via a table of
+pointers to system-call handlers indexed on system-call number (step 7). At that
+point the system-call handler runs (step 8). Once it has completed its work, control
+may be returned to the user-space library procedure at the instruction following the
+TRAP instruction (step 9). This procedure then returns to the user program in the
+usual way procedure calls return (step 10).</p>
+
+<p align="justify"; style="text-indent: 3em;">To finish the job, the user program has to clean up the stack, as it does after
+any procedure call (step 11). Assuming the stack grows downward, as it often does, the compiled code increments the stack pointer exactly enough to remove the
+parameters pushed before the call to <b>read</b>. The program is now free to do whatever
+it wants to do next.</p>
+
+<p align="justify"; style="text-indent: 3em;">In step 9 above, we said ‘‘may be returned to the user-space library procedure’’
+for good reason. The system call may block the caller, preventing it from continuing. For example, if it is trying to read from the keyboard and nothing has been
+typed yet, the caller has to be blocked. In this case, the operating system will look
+around to see if some other process can be run next. Later, when the desired input
+is available, this process will get the attention of the system and run steps 9–11.</p>
+
+<p align="justify"; style="text-indent: 3em;">In the following sections, we will examine some of the most heavily used
+POSIX system calls, or more specifically, the library procedures that make those
+system calls. POSIX has about 100 procedure calls. Some of the most important
+ones are listed in Fig. 1-18, grouped for convenience in four categories. In the text
+we will briefly examine each call to see what it does.</p>
+
+<p align="justify"; style="text-indent: 3em;">To a large extent, the services offered by these calls determine most of what
+the operating system has to do, since the resource management on personal computers is minimal (at least compared to big machines with multiple users). The
+services include things like creating and terminating processes, creating, deleting,
+reading, and writing files, managing directories, and performing input and output. </p>
+
+<p align="justify"; style="text-indent: 3em;">As an aside, it is worth pointing out that the mapping of POSIX procedure
+calls onto system calls is not one-to-one. The POSIX standard specifies a number
+of procedures that a conformant system must supply, but it does not specify whether they are system calls, library calls, or something else. If a procedure can be carried out without invoking a system call (i.e., without trapping to the kernel), it will
+usually be done in user space for reasons of performance. However, most of the
+POSIX procedures do invoke system calls, usually with one procedure mapping directly onto one system call. In a few cases, especially where several required procedures are only minor variations of one another, one system call handles more
+than one library call.</p>
+
+#### __1.6.1 System Calls for Process Management__
+
+<p align="justify"; style="text-indent: 3em;">The first group of calls in Fig. 1-18 deals with process management. Fork is a
+good place to start the discussion. Fork is the only way to create a new process in
+POSIX. It creates an exact duplicate of the original process, including all the file
+descriptors, registers—everything. After the fork, the original process and the copy
+(the parent and child) go their separate ways. All the variables have identical values at the time of the fork, but since the parent’s data are copied to create the child,
+subsequent changes in one of them do not affect the other one. (The program text,
+which is unchangeable, is shared between parent and child.) The fork call returns a
+value, which is zero in the child and equal to the child’s <b>PID (Process IDentifier)</b>
+in the parent. Using the returned PID, the two processes can see which one is the
+parent process and which one is the child process.</p>
+
+<p align="center"><b>Process Management</b></p>
+
+| Call |Description  |
+| ----- | ---- |
+| pid = for k( ) | Create a child process identical to the parent |
+| pid = waitpid(pid, &statloc, options)  | Wait for a child to terminate|
+| s = execve(name, argv, environp) | Replace a process’ core image | 
+| exit(status) | Ter minate process execution and return status |
+
+<p align="center"><b>File Management</b></p>
+
+| Call |Description  |
+| ----- | ---- |
+| d = open(file, how, ...) | Open a file for reading, writing, or both |
+| s = close(fd) | Close an open file |
+| n = read(fd, buffer, nbytes) | Read data from a file into a buffer |
+| n = write(fd, buffer, nbytes) | Write data from a buffer into a file |
+| position = lseek(fd, offset, whence) | Move the file pointer |
+| s = stat(name, &buf)  | Get a file’s status information |
+
+<p align="center"><b>Directory- and file-system management</b></p>
+
+| Call |Description  |
+| ----- | ---- |
+| s = mkdir(name, mode) | Create a new directory |
+| s = rmdir(name) | Remove an empty directory |
+| s = link(name1, name2) | Create a new entry, name2, pointing to name1 |
+| s = unlink(name) | Remove a director y entry |
+| s = mount(special, name, flag) | Mount a file system |
+| s = umount(special) | Unmount a file system |
+
+<p align="center"><b>Miscellaneous</b></p>
+
+| Call |Description  |
+| ----- | ---- |
+| s = chdir(dir name) | Change the wor king director y |
+| s = chmod(name, mode) | Change a file’s protection bits |
+| s = kill(pid, signal) | Send a signal to a process |
+| seconds = time(&seconds) | Get the elapsed time since Jan. 1, 1970
+
+<p align="center"><img width="450" src="images_ebook/figure1_18.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">In most cases, after a fork, the child will need to execute different code from
+the parent. Consider the case of the shell. It reads a command from the terminal,
+forks off a child process, waits for the child to execute the command, and then
+reads the next command when the child terminates. To wait for the child to finish, the parent executes a waitpid system call, which just waits until the child terminates
+(any child if more than one exists). Waitpid can wait for a specific child, or for any
+old child by setting the first parameter to −1. When waitpid completes, the address
+pointed to by the second parameter, statloc, will be set to the child process’ exit
+status (normal or abnormal termination and exit value). Various options are also
+provided, specified by the third parameter. For example, returning immediately if
+no child has already exited.</p>
+
+<p align="justify"; style="text-indent: 3em;">Now consider how fork is used by the shell. When a command is typed, the
+shell forks off a new process. This child process must execute the user command.
+It does this by using the execve system call, which causes its entire core image to
+be replaced by the file named in its first parameter. (Actually, the system call itself
+is exec, but several library procedures call it with different parameters and slightly
+different names. We will treat these as system calls here.) A highly simplified shell
+illustrating the use of fork, waitpid, and execve is shown in Fig. 1-19.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_19.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">In the most general case, execve has three parameters: the name of the file to
+be executed, a pointer to the argument array, and a pointer to the environment
+array. These will be described shortly. Various library routines, including execl,
+execv, execle, and execve, are provided to allow the parameters to be omitted or
+specified in various ways. Throughout this book we will use the name exec to
+represent the system call invoked by all of these.</p>
+
+<p align="justify"; style="text-indent: 3em;">Let us consider the case of a command such as
+
+    cp file1 file2
+used to copy file1 to file2. After the shell has forked, the child process locates and
+executes the file cp and passes to it the names of the source and target files.</p>
+
+<p align="justify"; style="text-indent: 3em;">The main program of cp (and main program of most other C programs) contains the declaration 
+
+    main(argc, argv, envp)
+where <i>argc</i> is a count of the number of items on the command line, including the
+program name. For the example above, <i>argc is 3</i>.</p>
+
+<p align="justify"; style="text-indent: 3em;">The second parameter, <i>argv</i>, is a pointer to an array. Element i of that array is a
+pointer to the ith string on the command line. In our example, <i>argv[0]</i> would point
+to the string ‘‘cp’’, <i>argv[1]</i> would point to the string ‘‘file1’’, <i>and argv[2]</i> would
+point to the string ‘‘file2’’.</p>
+
+<p align="justify"; style="text-indent: 3em;">The third parameter of <i>main, envp</i>, is a pointer to the environment, an array of
+strings containing assignments of the form <i>name = value</i> used to pass information
+such as the terminal type and home directory name to programs. There are library
+procedures that programs can call to get the environment variables, which are often
+used to customize how a user wants to perform certain tasks (e.g., the default printer to use). In Fig. 1-19, no environment is passed to the child, so the third parameter of <i>execve</i> is a zero.</p>
+
+<p align="justify"; style="text-indent: 3em;">If exec seems complicated, do not despair; it is (semantically) the most complex of all the POSIX system calls. All the other ones are much simpler. As an example of a simple one, consider exit, which processes should use when they are
+finished executing. It has one parameter, the exit status (0 to 255), which is returned to the parent via statloc in the waitpid system call.</p>
+
+<p align="justify"; style="text-indent: 3em;">Processes in UNIX have their memory divided up into three segments: the <b>text
+segment</b> (i.e., the program code), the <b>data segment</b> (i.e., the variables), and the
+<b>stack segment</b>. The data segment grows upward and the stack grows downward,
+as shown in Fig. 1-20. Between them is a gap of unused address space. The stack
+grows into the gap automatically, as needed, but expansion of the data segment is
+done explicitly by using a system call, br k, which specifies the new address where
+the data segment is to end. This call, however, is not defined by the POSIX standard, since programmers are encouraged to use the malloc library procedure for
+dynamically allocating storage, and the underlying implementation of malloc was
+not thought to be a suitable subject for standardization since few programmers use
+it directly and it is doubtful that anyone even notices that br k is not in POSIX.</p>
+
+#### __1.6.2 System Call for File Management__
+
+<p align="justify"; style="text-indent: 3em;">Many system calls relate to the file system. In this section we will look at calls
+that operate on individual files; in the next one we will examine those that involve
+directories or the file system as a whole.</p>
+
+<p align="justify"; style="text-indent: 3em;">To read or write a file, it must first be opened. This call specifies the file name
+to be opened, either as an absolute path name or relative to the working directory,
+as well as a code of O RDONLY, O WRONLY, or O RDWR, meaning open for
+reading, writing, or both. To create a new file, the O CREAT parameter is used.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_20.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">The file descriptor returned can then be used for reading or writing. Afterward, the
+file can be closed by close, which makes the file descriptor available for reuse on a
+subsequent open.</p>
+
+<p align="justify"; style="text-indent: 3em;">The most heavily used calls are undoubtedly read and wr ite. We saw read earlier. Wr ite has the same parameters.</p>
+
+<p align="justify"; style="text-indent: 3em;">Although most programs read and write files sequentially, for some applications programs need to be able to access any part of a file at random. Associated
+with each file is a pointer that indicates the current position in the file. When reading (writing) sequentially, it normally points to the next byte to be read (written).
+The lseek call changes the value of the position pointer, so that subsequent calls to
+read or wr ite can begin anywhere in the file.</p>
+
+<p align="justify"; style="text-indent: 3em;">Lseek has three parameters: the first is the file descriptor for the file, the second is a file position, and the third tells whether the file position is relative to the
+beginning of the file, the current position, or the end of the file. The value returned
+by lseek is the absolute position in the file (in bytes) after changing the pointer.</p>
+
+<p align="justify"; style="text-indent: 3em;">For each file, UNIX keeps track of the file mode (regular file, special file, directory, and so on), size, time of last modification, and other information. Programs can ask to see this information via the stat system call. The first parameter
+specifies the file to be inspected; the second one is a pointer to a structure where
+the information is to be put. The fstat calls does the same thing for an open file.</p>
+
+#### __1.6.3 System Calls for Directory Management__
+
+<p align="justify"; style="text-indent: 3em;">In this section we will look at some system calls that relate more to directories
+or the file system as a whole, rather than just to one specific file as in the previous
+section. The first two calls, mkdir and rmdir, create and remove empty directories,
+respectively. The next call is link. Its purpose is to allow the same file to appear
+under two or more names, often in different directories. A typical use is to allow
+several members of the same programming team to share a common file, with each
+of them having the file appear in his own directory, possibly under different names.
+Sharing a file is not the same as giving every team member a private copy; having a shared file means that changes that any member of the team makes are instantly
+visible to the other members—there is only one file. When copies are made of a
+file, subsequent changes made to one copy do not affect the others.</p>
+
+<p align="justify"; style="text-indent: 3em;">To see how link works, consider the situation of Fig. 1-21(a). Here are two
+users, <i>ast</i> and <i>jim</i>, each having his own directory with some files. If <i>ast</i> now executes a program containing the system call
+
+    link("/usr/jim/memo", "/usr/ast/note");
+the file memo in <i>jim’s</i> directory is now entered into ast’s directory under the name
+<i>note</i>. Thereafter, <i>/usr/jim/memo</i> and <i>/usr/ast/note</i> refer to the same file. As an
+aside, whether user directories are kept in <i>/usr, /user, /home,</i> or somewhere else is
+simply a decision made by the local system administrator.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_21.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Understanding how link works will probably make it clearer what it does.
+Every file in UNIX has a unique number, its i-number, that identifies it. This
+i-number is an index into a table of <b>i-nodes</b>, one per file, telling who owns the file,
+where its disk blocks are, and so on. A directory is simply a file containing a set of
+(i-number, ASCII name) pairs. In the first versions of UNIX, each directory entry
+was 16 bytes—2 bytes for the i-number and 14 bytes for the name. Now a more
+complicated structure is needed to support long file names, but conceptually a directory is still a set of (i-number, ASCII name) pairs. In Fig. 1-21, mail has i-number 16, and so on. What link does is simply create a brand new directory entry with
+a (possibly new) name, using the i-number of an existing file. In Fig. 1-21(b), two
+entries have the same i-number (70) and thus refer to the same file. If either one is
+later removed, using the unlink system call, the other one remains. If both are removed, UNIX sees that no entries to the file exist (a field in the i-node keeps track
+of the number of directory entries pointing to the file), so the file is removed from
+the disk.</p>
+
+<p align="justify"; style="text-indent: 3em;">As we have mentioned earlier, the mount system call allows two file systems to
+be merged into one. A common situation is to have the root file system, containing
+the binary (executable) versions of the common commands and other heavily used
+files, on a hard disk (sub)partition and user files on another (sub)partition. Further,
+the user can then insert a USB disk with files to be read.</p>
+
+<p align="justify"; style="text-indent: 3em;">By executing the mount system call, the USB file system can be attached to the
+root file system, as shown in Fig. 1-22. A typical statement in C to mount is
+
+    mount("/dev/sdb0", "/mnt", 0);
+where the first parameter is the name of a block special file for USB drive 0, the
+second parameter is the place in the tree where it is to be mounted, and the third
+parameter tells whether the file system is to be mounted read-write or read-only.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_22.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">After the mount call, a file on drive 0 can be accessed by just using its path
+from the root directory or the working directory, without regard to which drive it is
+on. In fact, second, third, and fourth drives can also be mounted anywhere in the
+tree. The mount call makes it possible to integrate removable media into a single
+integrated file hierarchy, without having to worry about which device a file is on.
+Although this example involves CD-ROMs, portions of hard disks (often called
+<b>partitions</b> or <b>minor devices</b>) can also be mounted this way, as well as external
+hard disks and USB sticks. When a file system is no longer needed, it can be
+unmounted with the umount system call.</p>
+
+#### __1.6.4 Miscellaneous System Calls__
+
+<p align="justify"; style="text-indent: 3em;">A variety of other system calls exist as well. We will look at just four of them
+here. The chdir call changes the current working directory. After the call
+
+    chdir("/usr/ast/test");
+an open on the file <i>xyz</i> will open <i>/usr/ast/test/xyz</i>. The concept of a working directory eliminates the need for typing (long) absolute path names all the time.</p>
+
+<p align="justify"; style="text-indent: 3em;">In UNIX every file has a mode used for protection. The mode includes the
+read-write-execute bits for the owner, group, and others. The chmod system call
+makes it possible to change the mode of a file. For example, to make a file readonly by everyone except the owner, one could execute
+
+    chmod("file", 0644);
+
+<p align="justify"; style="text-indent: 3em;">The kill system call is the way users and user processes send signals. If a process is prepared to catch a particular signal, then when it arrives, a signal handler is run. If the process is not prepared to handle a signal, then its arrival kills the process (hence the name of the call).</p>
+
+<p align="justify"; style="text-indent: 3em;">POSIX defines a number of procedures for dealing with time. For example,
+time just returns the current time in seconds, with 0 corresponding to Jan. 1, 1970
+at midnight (just as the day was starting, not ending). On computers using 32-bit
+words, the maximum value time can return is 2^32 − 1 seconds (assuming an unsigned integer is used). This value corresponds to a little over 136 years. Thus in the
+year 2106, 32-bit UNIX systems will go berserk, not unlike the famous Y2K problem that would have wreaked havoc with the world’s computers in 2000, were it
+not for the massive effort the IT industry put into fixing the problem. If you currently have a 32-bit UNIX system, you are advised to trade it in for a 64-bit one
+sometime before the year 2106.</p>
+
+#### __1.6.5 The Windows Win32 API__
+
+<p align="justify"; style="text-indent: 3em;">So far we have focused primarily on UNIX. Now it is time to look briefly at
+Windows. Windows and UNIX differ in a fundamental way in their respective programming models. A UNIX program consists of code that does something or
+other, making system calls to have certain services performed. In contrast, a Windows program is normally event driven. The main program waits for some event to
+happen, then calls a procedure to handle it. Typical events are keys being struck,
+the mouse being moved, a mouse button being pushed, or a USB drive inserted.
+Handlers are then called to process the event, update the screen and update the internal program state. All in all, this leads to a somewhat different style of programming than with UNIX, but since the focus of this book is on operating system
+function and structure, these different programming models will not concern us
+much more.</p>
+
+<p align="justify"; style="text-indent: 3em;">Of course, Windows also has system calls. With UNIX, there is almost a oneto-one relationship between the system calls (e.g., read) and the library procedures
+(e.g., <i>read</i>) used to invoke the system calls. In other words, for each system call,
+there is roughly one library procedure that is called to invoke it, as indicated in
+Fig. 1-17. Furthermore, POSIX has only about 100 procedure calls.</p>
+
+<p align="justify"; style="text-indent: 3em;">With Windows, the situation is radically different. To start with, the library
+calls and the actual system calls are highly decoupled. Microsoft has defined a set
+of procedures called the Win32 API (Application Programming Interface) that
+programmers are expected to use to get operating system services. This interface is
+(partially) supported on all versions of Windows since Windows 95. By decoupling the API interface from the actual system calls, Microsoft retains the ability to
+change the actual system calls in time (even from release to release) without invalidating existing programs. What actually constitutes Win32 is also slightly ambiguous because recent versions of Windows have many new calls that were not previously available. In this section, Win32 means the interface supported by all versions of Windows. Win32 provides compatibility among versions of Windows.</p>
+
+<p align="justify"; style="text-indent: 3em;">The number of Win32 API calls is extremely large, numbering in the thousands. Furthermore, while many of them do invoke system calls, a substantial number are carried out entirely in user space. As a consequence, with Windows it is
+impossible to see what is a system call (i.e., performed by the kernel) and what is
+simply a user-space library call. In fact, what is a system call in one version of
+Windows may be done in user space in a different version, and vice versa. When
+we discuss the Windows system calls in this book, we will use the Win32 procedures (where appropriate) since Microsoft guarantees that these will be stable over
+time. But it is worth remembering that not all of them are true system calls (i.e.,
+traps to the kernel).</p>
+
+<p align="justify"; style="text-indent: 3em;">The Win32 API has a huge number of calls for managing windows, geometric
+figures, text, fonts, scrollbars, dialog boxes, menus, and other features of the GUI.
+To the extent that the graphics subsystem runs in the kernel (true on some versions
+of Windows but not on all), these are system calls; otherwise they are just library
+calls. Should we discuss these calls in this book or not? Since they are not really
+related to the function of an operating system, we have decided not to, even though
+they may be carried out by the kernel. Readers interested in the Win32 API should
+consult one of the many books on the subject (e.g., Hart, 1997; Rector and Newcomer, 1997; and Simon, 1997).</p>
+
+<p align="justify"; style="text-indent: 3em;">Even introducing all the Win32 API calls here is out of the question, so we will
+restrict ourselves to those calls that roughly correspond to the functionality of the
+UNIX calls listed in Fig. 1-18. These are listed in Fig. 1-23.</p>
+
+<p align="justify"; style="text-indent: 3em;">Let us now briefly go through the list of Fig. 1-23. CreateProcess creates a
+new process. It does the combined work of fork and execve in UNIX. It has many
+parameters specifying the properties of the newly created process. Windows does
+not have a process hierarchy as UNIX does so there is no concept of a parent process and a child process. After a process is created, the creator and createe are
+equals. WaitForSingleObject is used to wait for an event. Many possible events can
+be waited for. If the parameter specifies a process, then the caller waits for the
+specified process to exit, which is done using ExitProcess.</p>
+
+<p align="justify"; style="text-indent: 3em;">The next six calls operate on files and are functionally similar to their UNIX
+counterparts although they differ in the parameters and details. Still, files can be
+opened, closed, read, and written pretty much as in UNIX. The SetFilePointer and
+GetFileAttr ibutesEx calls set the file position and get some of the file attributes.</p>
+
+<p align="justify"; style="text-indent: 3em;">Windows has directories and they are created with CreateDirector y and
+RemoveDirector y API calls, respectively. There is also a notion of a current directory, set by SetCurrentDirector y. The current time of day is acquired using GetLocalTime.</p>
+
+<p align="justify"; style="text-indent: 3em;">The Win32 interface does not have links to files, mounted file systems, security, or signals, so the calls corresponding to the UNIX ones do not exist. Of course,
+Win32 has a huge number of other calls that UNIX does not have, especially for
+managing the GUI. Windows Vista has an elaborate security system and also supports file links. Windows 7 and 8 add yet more features and system calls.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_23.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">One last note about Win32 is perhaps worth making. Win32 is not a terribly
+uniform or consistent interface. The main culprit here was the need to be backward compatible with the previous 16-bit interface used in Windows 3.x.</p>
+
+### __1.7 OPERATING SYSTEM STRUCTURE__
+
+<p align="justify"; style="text-indent: 3em;">Now that we have seen what operating systems look like on the outside (i.e.,
+the programmer’s interface), it is time to take a look inside. In the following sections, we will examine six different structures that have been tried, in order to get
+some idea of the spectrum of possibilities. These are by no means exhaustive, but
+they giv e an idea of some designs that have been tried in practice. The six designs
+we will discuss here are monolithic systems, layered systems, microkernels, client-server systems, virtual machines, and exokernels.</p>
+
+#### __1.7.1 Monolithic Systems__
+
+<p align="justify"; style="text-indent: 3em;">By far the most common organization, in the monolithic approach the entire
+operating system runs as a single program in kernel mode. The operating system is
+written as a collection of procedures, linked together into a single large executable
+binary program. When this technique is used, each procedure in the system is free
+to call any other one, if the latter provides some useful computation that the former
+needs. Being able to call any procedure you want is very efficient, but having thousands of procedures that can call each other without restriction may also lead to a
+system that is unwieldy and difficult to understand. Also, a crash in any of these
+procedures will take down the entire operating system.</p>
+
+<p align="justify"; style="text-indent: 3em;">To construct the actual object program of the operating system when this approach is used, one first compiles all the individual procedures (or the files containing the procedures) and then binds them all together into a single executable
+file using the system linker. In terms of information hiding, there is essentially
+none—every procedure is visible to every other procedure (as opposed to a structure containing modules or packages, in which much of the information is hidden
+aw ay inside modules, and only the officially designated entry points can be called
+from outside the module).</p>
+
+<p align="justify"; style="text-indent: 3em;">Even in monolithic systems, however, it is possible to have some structure. The
+services (system calls) provided by the operating system are requested by putting
+the parameters in a well-defined place (e.g., on the stack) and then executing a trap
+instruction. This instruction switches the machine from user mode to kernel mode
+and transfers control to the operating system, shown as step 6 in Fig. 1-17. The
+operating system then fetches the parameters and determines which system call is
+to be carried out. After that, it indexes into a table that contains in slot k a pointer
+to the procedure that carries out system call k (step 7 in Fig. 1-17).</p>
+
+<p align="justify"; style="text-indent: 3em;">This organization suggests a basic structure for the operating system:
+
+1. A main program that invokes the requested service procedure.
+2. A set of service procedures that carry out the system calls.
+3. A set of utility procedures that help the service procedures.
+
+In this model, for each system call there is one service procedure that takes care of
+it and executes it. The utility procedures do things that are needed by several service procedures, such as fetching data from user programs. This division of the
+procedures into three layers is shown in Fig. 1-24.</p>
+
+<p align="justify"; style="text-indent: 3em;">In addition to the core operating system that is loaded when the computer is
+booted, many operating systems support loadable extensions, such as I/O device
+drivers and file systems. These components are loaded on demand. In UNIX they
+are called <b>shared libraries</b>. In Windows they are called <b>DLLs (Dynamic-Link
+Libraries)</b>. They hav e file extension <i>.dll</i> and the <i>C:\Windows\system32</i> directory
+on Windows systems has well over 1000 of them.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_24.png"></p>
+
+#### __1.7.2 Layered System__
+
+<p align="justify"; style="text-indent: 3em;">A generalization of the approach of Fig. 1-24 is to organize the operating system as a hierarchy of layers, each one constructed upon the one below it. The first
+system constructed in this way was the THE system built at the Technische Hogeschool Eindhoven in the Netherlands by E. W. Dijkstra (1968) and his students.
+The THE system was a simple batch system for a Dutch computer, the Electrologica X8, which had 32K of 27-bit words (bits were expensive back then).</p>
+
+<p align="justify"; style="text-indent: 3em;">The system had six layers, as shown in Fig. 1-25. Layer 0 dealt with allocation
+of the processor, switching between processes when interrupts occurred or timers
+expired. Above layer 0, the system consisted of sequential processes, each of
+which could be programmed without having to worry about the fact that multiple
+processes were running on a single processor. In other words, layer 0 provided the
+basic multiprogramming of the CPU.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_25.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Layer 1 did the memory management. It allocated space for processes in main
+memory and on a 512K word drum used for holding parts of processes (pages) for
+which there was no room in main memory. Above layer 1, processes did not have
+to worry about whether they were in memory or on the drum; the layer 1 software took care of making sure pages were brought into memory at the moment they
+were needed and removed when they were not needed.</p>
+
+<p align="justify"; style="text-indent: 3em;">Layer 2 handled communication between each process and the operator console (that is, the user). On top of this layer each process effectively had its own operator console. Layer 3 took care of managing the I/O devices and buffering the
+information streams to and from them. Above layer 3 each process could deal with
+abstract I/O devices with nice properties, instead of real devices with many peculiarities. Layer 4 was where the user programs were found. They did not have to
+worry about process, memory, console, or I/O management. The system operator
+process was located in layer 5.</p>
+
+<p align="justify"; style="text-indent: 3em;">A further generalization of the layering concept was present in the MULTICS
+system. Instead of layers, MULTICS was described as having a series of concentric
+rings, with the inner ones being more privileged than the outer ones (which is effectively the same thing). When a procedure in an outer ring wanted to call a procedure in an inner ring, it had to make the equivalent of a system call, that is, a
+TRAP instruction whose parameters were carefully checked for validity before the
+call was allowed to proceed. Although the entire operating system was part of the
+address space of each user process in MULTICS, the hardware made it possible to
+designate individual procedures (memory segments, actually) as protected against
+reading, writing, or executing.</p>
+
+<p align="justify"; style="text-indent: 3em;">Whereas the THE layering scheme was really only a design aid, because all the
+parts of the system were ultimately linked together into a single executable program, in MULTICS, the ring mechanism was very much present at run time and
+enforced by the hardware. The advantage of the ring mechanism is that it can easily be extended to structure user subsystems. For example, a professor could write a
+program to test and grade student programs and run this program in ring n, with
+the student programs running in ring n + 1 so that they could not change their
+grades.</p>
+
+#### __1.7.3 Microkernels__
+
+<p align="justify"; style="text-indent: 3em;">With the layered approach, the designers have a choice where to draw the kernel-user boundary. Traditionally, all the layers went in the kernel, but that is not
+necessary. In fact, a strong case can be made for putting as little as possible in kernel mode because bugs in the kernel can bring down the system instantly. In contrast, user processes can be set up to have less power so that a bug there may not be
+fatal.</p>
+
+<p align="justify"; style="text-indent: 3em;">Various researchers have repeatedly studied the number of bugs per 1000 lines
+of code (e.g., Basilli and Perricone, 1984; and Ostrand and Weyuker, 2002). Bug
+density depends on module size, module age, and more, but a ballpark figure for
+serious industrial systems is between two and ten bugs per thousand lines of code.
+This means that a monolithic operating system of fiv e million lines of code is likely to contain between 10,000 and 50,000 kernel bugs. Not all of these are fatal, of course, since some bugs may be things like issuing an incorrect error message in a
+situation that rarely occurs. Nevertheless, operating systems are sufficiently buggy
+that computer manufacturers put reset buttons on them (often on the front panel),
+something the manufacturers of TV sets, stereos, and cars do not do, despite the
+large amount of software in these devices.</p>
+
+<p align="justify"; style="text-indent: 3em;">The basic idea behind the microkernel design is to achieve high reliability by
+splitting the operating system up into small, well-defined modules, only one of
+which—the microkernel—runs in kernel mode and the rest run as relatively powerless ordinary user processes. In particular, by running each device driver and file
+system as a separate user process, a bug in one of these can crash that component,
+but cannot crash the entire system. Thus a bug in the audio driver will cause the
+sound to be garbled or stop, but will not crash the computer. In contrast, in a
+monolithic system with all the drivers in the kernel, a buggy audio driver can easily
+reference an invalid memory address and bring the system to a grinding halt instantly.</p>
+
+<p align="justify"; style="text-indent: 3em;">Many microkernels have been implemented and deployed for decades (Haertig
+et al., 1997; Heiser et al., 2006; Herder et al., 2006; Hildebrand, 1992; Kirsch et
+al., 2005; Liedtke, 1993, 1995, 1996; Pike et al., 1992; and Zuberi et al., 1999).
+With the exception of OS X, which is based on the Mach microkernel (Accetta et
+al., 1986), common desktop operating systems do not use microkernels. However,
+they are dominant in real-time, industrial, avionics, and military applications that
+are mission critical and have very high reliability requirements. A few of the better-known microkernels include Integrity, K42, L4, PikeOS, QNX, Symbian, and
+MINIX 3. We now giv e a brief overview of MINIX 3, which has taken the idea of
+modularity to the limit, breaking most of the operating system up into a number of
+independent user-mode processes. MINIX 3 is a POSIX-conformant, open source
+system freely available at www.minix3.org (Giuffrida et al., 2012; Giuffrida et al.,
+2013; Herder et al., 2006; Herder et al., 2009; and Hruby et al., 2013).</p>
+
+<p align="justify"; style="text-indent: 3em;">The MINIX 3 microkernel is only about 12,000 lines of C and some 1400 lines
+of assembler for very low-level functions such as catching interrupts and switching
+processes. The C code manages and schedules processes, handles interprocess
+communication (by passing messages between processes), and offers a set of about
+40 kernel calls to allow the rest of the operating system to do its work. These calls
+perform functions like hooking handlers to interrupts, moving data between address spaces, and installing memory maps for new processes. The process structure
+of MINIX 3 is shown in Fig. 1-26, with the kernel call handlers labeled Sys. The
+device driver for the clock is also in the kernel because the scheduler interacts
+closely with it. The other device drivers run as separate user processes.</p>
+
+<p align="justify"; style="text-indent: 3em;">Outside the kernel, the system is structured as three layers of processes all running in user mode. The lowest layer contains the device drivers. Since they run in
+user mode, they do not have physical access to the I/O port space and cannot issue
+I/O commands directly. Instead, to program an I/O device, the driver builds a structure telling which values to write to which I/O ports and makes a kernel call telling
+
+<p align="center"><img width="550" src="images_ebook/figure1_26.png"></p>
+
+the kernel to do the write. This approach means that the kernel can check to see
+that the driver is writing (or reading) from I/O it is authorized to use. Consequently
+(and unlike a monolithic design), a buggy audio driver cannot accidentally write on
+the disk.</p>
+
+<p align="justify"; style="text-indent: 3em;">Above the drivers is another user-mode layer containing the servers, which do
+most of the work of the operating system. One or more file servers manage the file
+system(s), the process manager creates, destroys, and manages processes, and so
+on. User programs obtain operating system services by sending short messages to
+the servers asking for the POSIX system calls. For example, a process needing to
+do a read sends a message to one of the file servers telling it what to read.</p>
+
+<p align="justify"; style="text-indent: 3em;">One interesting server is the <b>reincarnation server</b>, whose job is to check if the
+other servers and drivers are functioning correctly. In the event that a faulty one is
+detected, it is automatically replaced without any user intervention. In this way,
+the system is self healing and can achieve high reliability.</p>
+
+<p align="justify"; style="text-indent: 3em;">The system has many restrictions limiting the power of each process. As mentioned, drivers can touch only authorized I/O ports, but access to kernel calls is also
+controlled on a per-process basis, as is the ability to send messages to other processes. Processes can also grant limited permission for other processes to have the
+kernel access their address spaces. As an example, a file system can grant permission for the disk driver to let the kernel put a newly read-in disk block at a specific
+address within the file system’s address space. The sum total of all these restrictions is that each driver and server has exactly the power to do its work and nothing
+more, thus greatly limiting the damage a buggy component can do.</p>
+
+<p align="justify"; style="text-indent: 3em;">An idea somewhat related to having a minimal kernel is to put the <b>mechanism</b>
+for doing something in the kernel but not the <b>policy</b>. To make this point better,
+consider the scheduling of processes. A relatively simple scheduling algorithm is
+to assign a numerical priority to every process and then have the kernel run the highest-priority process that is runnable. The mechanism—in the kernel—is to
+look for the highest-priority process and run it. The policy—assigning priorities to
+processes—can be done by user-mode processes. In this way, policy and mechanism can be decoupled and the kernel can be made smaller.</p>
+
+#### __1.7.4 Client-Server Model__
+
+<p align="justify"; style="text-indent: 3em;">A slight variation of the microkernel idea is to distinguish two classes of processes, the <b>servers</b>, each of which provides some service, and the clients, which use
+these services. This model is known as the <b>client-server model</b>. Often the lowest
+layer is a microkernel, but that is not required. The essence is the presence of client processes and server processes.</p>
+
+<p align="justify"; style="text-indent: 3em;">Communication between clients and servers is often by message passing. To
+obtain a service, a client process constructs a message saying what it wants and
+sends it to the appropriate service. The service then does the work and sends back
+the answer. If the client and server happen to run on the same machine, certain
+optimizations are possible, but conceptually, we are still talking about message
+passing here.</p>
+
+<p align="justify"; style="text-indent: 3em;">An obvious generalization of this idea is to have the clients and servers run on
+different computers, connected by a local or wide-area network, as depicted in
+Fig. 1-27. Since clients communicate with servers by sending messages, the clients need not know whether the messages are handled locally on their own machines, or whether they are sent across a network to servers on a remote machine.
+As far as the client is concerned, the same thing happens in both cases: requests are
+sent and replies come back. Thus the client-server model is an abstraction that can
+be used for a single machine or for a network of machines.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_27.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Increasingly many systems involve users at their home PCs as clients and large
+machines elsewhere running as servers. In fact, much of the Web operates this
+way. A PC sends a request for a Web page to the server and the Web page comes
+back. This is a typical use of the client-server model in a network.</p>
+
+#### __1.7.5 Virtual Machines__
+
+<p align="justify"; style="text-indent: 3em;">The initial releases of OS/360 were strictly batch systems. Nevertheless, many
+360 users wanted to be able to work interactively at a terminal, so various groups,
+both inside and outside IBM, decided to write timesharing systems for it. The official IBM timesharing system, TSS/360, was delivered late, and when it finally arrived it was so big and slow that few sites converted to it. It was eventually abandoned after its development had consumed some $50 million (Graham, 1970). But
+a group at IBM’s Scientific Center in Cambridge, Massachusetts, produced a radically different system that IBM eventually accepted as a product. A linear descendant of it, called <b>z/VM</b>, is now widely used on IBM’s current mainframes, the
+zSeries, which are heavily used in large corporate data centers, for example, as
+e-commerce servers that handle hundreds or thousands of transactions per second
+and use databases whose sizes run to millions of gigabytes.</p>
+
+#### __VM/370__
+
+<p align="justify"; style="text-indent: 3em;">This system, originally called CP/CMS and later renamed VM/370 (Seawright
+and MacKinnon, 1979), was based on an astute observation: a timesharing system
+provides (1) multiprogramming and (2) an extended machine with a more convenient interface than the bare hardware. The essence of VM/370 is to completely
+separate these two functions.</p>
+
+<p align="justify"; style="text-indent: 3em;">The heart of the system, known as the v<b>irtual machine monitor</b>, runs on the
+bare hardware and does the multiprogramming, providing not one, but several virtual machines to the next layer up, as shown in Fig. 1-28. However, unlike all
+other operating systems, these virtual machines are not extended machines, with
+files and other nice features. Instead, they are exact copies of the bare hardware, including kernel/user mode, I/O, interrupts, and everything else the real machine has.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_28.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">Because each virtual machine is identical to the true hardware, each one can
+run any operating system that will run directly on the bare hardware. Different virtual machines can, and frequently do, run different operating systems. On the original IBM VM/370 system, some ran OS/360 or one of the other large batch or transaction-processing operating systems, while others ran a single-user, interactive
+system called <b>CMS (Conversational Monitor System)</b> for interactive timesharing
+users. The latter was popular with programmers.</p>
+
+<p align="justify"; style="text-indent: 3em;">When a CMS program executed a system call, the call was trapped to the operating system in its own virtual machine, not to VM/370, just as it would be were it
+running on a real machine instead of a virtual one. CMS then issued the normal
+hardware I/O instructions for reading its virtual disk or whatever was needed to
+carry out the call. These I/O instructions were trapped by VM/370, which then performed them as part of its simulation of the real hardware. By completely separating the functions of multiprogramming and providing an extended machine, each
+of the pieces could be much simpler, more flexible, and much easier to maintain.</p>
+
+<p align="justify"; style="text-indent: 3em;">In its modern incarnation, z/VM is usually used to run multiple complete operating systems rather than stripped-down single-user systems like CMS. For example, the zSeries is capable of running one or more Linux virtual machines along
+with traditional IBM operating systems.</p>
+
+#### __Virtual Machines Rediscovered__
+
+<p align="justify"; style="text-indent: 3em;">While IBM has had a virtual-machine product available for four decades, and a
+few other companies, including Oracle and Hewlett-Packard, have recently added
+virtual-machine support to their high-end enterprise servers, the idea of virtualization has largely been ignored in the PC world until recently. But in the past
+few years, a combination of new needs, new software, and new technologies have
+combined to make it a hot topic.</p>
+
+<p align="justify"; style="text-indent: 3em;">First the needs. Many companies have traditionally run their mail servers, Web
+servers, FTP servers, and other servers on separate computers, sometimes with different operating systems. They see virtualization as a way to run them all on the
+same machine without having a crash of one server bring down the rest.</p>
+
+<p align="justify"; style="text-indent: 3em;">Virtualization is also popular in the Web hosting world. Without virtualization,
+Web hosting customers are forced to choose between <b>shared hosting</b> (which just
+gives them a login account on a Web server, but no control over the server software) and dedicated hosting (which gives them their own machine, which is very
+flexible but not cost effective for small to medium Websites). When a Web hosting
+company offers virtual machines for rent, a single physical machine can run many
+virtual machines, each of which appears to be a complete machine. Customers who
+rent a virtual machine can run whatever operating system and software they want
+to, but at a fraction of the cost of a dedicated server (because the same physical
+machine supports many virtual machines at the same time).</p>
+
+<p align="justify"; style="text-indent: 3em;">Another use of virtualization is for end users who want to be able to run two or
+more operating systems at the same time, say Windows and Linux, because some
+of their favorite application packages run on one and some run on the other. This
+situation is illustrated in Fig. 1-29(a), where the term ‘‘virtual machine monitor’’
+has been renamed <b>type 1 hypervisor</b>, which is commonly used nowadays because ‘‘virtual machine monitor’’ requires more keystrokes than people are prepared to
+put up with now. Note that many authors use the terms interchangeably though.</p>
+
+<p align="center"><img width="550" src="images_ebook/figure1_29.png"></p>
+
+<p align="justify"; style="text-indent: 3em;">While no one disputes the attractiveness of virtual machines today, the problem
+then was implementation. In order to run virtual machine software on a computer,
+its CPU must be virtualizable (Popek and Goldberg, 1974). In a nutshell, here is
+the problem. When an operating system running on a virtual machine (in user
+mode) executes a privileged instruction, such as modifying the PSW or doing I/O,
+it is essential that the hardware trap to the virtual-machine monitor so the instruction can be emulated in software. On some CPUs—notably the Pentium, its predecessors, and its clones—attempts to execute privileged instructions in user mode
+are just ignored. This property made it impossible to have virtual machines on this
+hardware, which explains the lack of interest in the x86 world. Of course, there
+were interpreters for the Pentium, such as Bochs, that ran on the Pentium, but with
+a performance loss of one to two orders of magnitude, they were not useful for serious work.</p>
+
+<p align="justify"; style="text-indent: 3em;">This situation changed as a result of several academic research projects in the
+1990s and early years of this millennium, notably Disco at Stanford (Bugnion et
+al., 1997) and Xen at Cambridge University (Barham et al., 2003). These research
+papers led to several commercial products (e.g., VMware Workstation and Xen)
+and a revival of interest in virtual machines. Besides VMware and Xen, popular
+hypervisors today include KVM (for the Linux kernel), VirtualBox (by Oracle),
+and Hyper-V (by Microsoft).</p>
+
+<p align="justify"; style="text-indent: 3em;">Some of these early research projects improved the performance over interpreters like Bochs by translating blocks of code on the fly, storing them in an internal cache, and then reusing them if they were executed again. This improved the
+performance considerably, and led to what we will call <b>machine simulators</b>, as
+shown in Fig. 1-29(b). However, although this technique, known as <b>binary translation</b>, helped improve matters, the resulting systems, while good enough to publish papers about in academic conferences, were still not fast enough to use in
+commercial environments where performance matters a lot.</p>
+
+<p align="justify"; style="text-indent: 3em;">The next step in improving performance was to add a kernel module to do
+some of the heavy lifting, as shown in Fig. 1-29(c). In practice now, all commercially available hypervisors, such as VMware Workstation, use this hybrid strategy
+(and have many other improvements as well). They are called <b>type 2 hypervisors</b>
+by everyone, so we will (somewhat grudgingly) go along and use this name in the
+rest of this book, even though we would prefer to called them type 1.7 hypervisors
+to reflect the fact that they are not entirely user-mode programs. In Chap. 7, we
+will describe in detail how VMware Workstation works and what the various
+pieces do.</p>
+
+<p align="justify"; style="text-indent: 3em;">In practice, the real distinction between a type 1 hypervisor and a type 2 hypervisor is that a type 2 makes uses of a <b>host operating system</b> and its file system to
+create processes, store files, and so on. A type 1 hypervisor has no underlying support and must perform all these functions itself.</p>
+
+<p align="justify"; style="text-indent: 3em;">After a type 2 hypervisor is started, it reads the installation CD-ROM (or CDROM image file) for the chosen <b>guest operating system</b> and installs the guest OS
+on a virtual disk, which is just a big file in the host operating system’s file system.
+Type 1 hypervisors cannot do this because there is no host operating system to
+store files on. They must manage their own storage on a raw disk partition.</p>
+
+<p align="justify"; style="text-indent: 3em;">When the guest operating system is booted, it does the same thing it does on
+the actual hardware, typically starting up some background processes and then a
+GUI. To the user, the guest operating system behaves the same way it does when
+running on the bare metal even though that is not the case here.</p>
+
+<p align="justify"; style="text-indent: 3em;">A different approach to handling control instructions is to modify the operating
+system to remove them. This approach is not true virtualization, but </b>paravirtualization</b>. We will discuss virtualization in more detail in Chap. 7.</p>
+
+#### __The Java Virtual Machine__
+
+<p align="justify"; style="text-indent: 3em;">Another area where virtual machines are used, but in a somewhat different
+way, is for running Java programs. When Sun Microsystems invented the Java programming language, it also invented a virtual machine (i.e., a computer architecture) called the <b>JVM (Java Virtual Machine)</b>. The Java compiler produces code
+for JVM, which then typically is executed by a software JVM interpreter. The advantage of this approach is that the JVM code can be shipped over the Internet to
+any computer that has a JVM interpreter and run there. If the compiler had produced SPARC or x86 binary programs, for example, they could not have been
+shipped and run anywhere as easily. (Of course, Sun could have produced a compiler that produced SPARC binaries and then distributed a SPARC interpreter, but
+JVM is a much simpler architecture to interpret.) Another advantage of using JVM
+is that if the interpreter is implemented properly, which is not completely trivial,
+incoming JVM programs can be checked for safety and then executed in a protected environment so they cannot steal data or do any damage.</p>
+
+#### __1.7.6 Exokernels__
+
+<p align="justify"; style="text-indent: 3em;">Rather than cloning the actual machine, as is done with virtual machines, another strategy is partitioning it, in other words, giving each user a subset of the resources. Thus one virtual machine might get disk blocks 0 to 1023, the next one
+might get blocks 1024 to 2047, and so on.</p>
+
+<p align="justify"; style="text-indent: 3em;">At the bottom layer, running in kernel mode, is a program called the exokernel
+(Engler et al., 1995). Its job is to allocate resources to virtual machines and then
+check attempts to use them to make sure no machine is trying to use somebody
+else’s resources. Each user-level virtual machine can run its own operating system,
+as on VM/370 and the Pentium virtual 8086s, except that each one is restricted to
+using only the resources it has asked for and been allocated.</p>
+
+<p align="justify"; style="text-indent: 3em;">The advantage of the exokernel scheme is that it saves a layer of mapping. In
+the other designs, each virtual machine thinks it has its own disk, with blocks running from 0 to some maximum, so the virtual machine monitor must maintain
+tables to remap disk addresses (and all other resources). With the exokernel, this
+remapping is not needed. The exokernel need only keep track of which virtual machine has been assigned which resource. This method still has the advantage of
+separating the multiprogramming (in the exokernel) from the user operating system
+code (in user space), but with less overhead, since all the exokernel has to do is
+keep the virtual machines out of each other’s hair.</p>
