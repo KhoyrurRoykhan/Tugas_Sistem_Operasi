@@ -37,4 +37,59 @@
 
     <p align="center"><img width="450" src="Images_Tugas3/1_contoh_manajemen_berkas_d.png"></p>
 
+<br>
+
+### __2. Layanan Sistem Operasi__
+
+- __Manipulasi Sistem Berkas__
+
+    Contoh pada Layanan SO Manipulalsi Sistem Berkas adalah saat kita membuat sebuah file atau menghapus file, misal :
     
+    membuat file notepad
+    <p align="center"><img width="450" src="Images_Tugas3/2_Manipulasi_berkas.png"></p>
+    kemudian kita dapat melihat kapan file tersebut di buat / modifikasi / akses dibagian _properties -> General_
+
+    <p align="center"><img width="450" src="Images_Tugas3/2_Manipulasi_berkas_b.png"></p>
+
+    kemudian kita dapat memodifikasi isi file tersebut .
+    <p align="center"><img width="450" src="Images_Tugas3/2_Manipulasi_berkas_c.png"></p>
+
+    Setelah kita modifikasi maka informasi dari genral akan berubah juga sesuai waktu kita memodifikasi dan akses fie tersebut.
+
+    <p align="center"><img width="450" src="Images_Tugas3/2_Manipulasi_berkas_d.png"></p>
+
+- __Eksekusi Program__
+
+    Ketika kita menjalankan program sistem akan me-load program tersebut ke memori, contohnya saat kita membuka aplikasi Visual Studio Code maka sistem bisa menampilkan berapa memori yang di gunakan untuk menjalankan program tersebut.
+    
+    <p align="center"><img width="450" src="Images_Tugas3/2_Eksekusi Program.png"></p>
+
+- __Deteksi Eror__
+
+    Contoh deteksi eror adalah saat kita menganti nama file atau memindahkan file yang sedang berjalan, misal kita membuka file ppt dan kita ingin mengganti nama file tersebut namun file tersebut masih tetap terbuka, maka akan muncul laporan kesalahan dan pesannya.
+
+    <p align="center"><img width="450" src="Images_Tugas3/2_eror.png"></p>
+
+<br>
+
+### __3. System Call__
+
+- __Informasi dan Pemeliharaan__
+
+    Contohnya adalah meminta sistem untuk menampilkan jumlah memori penyimpanan yang telah digunakan dan yang masih bisa digunakan.
+
+    <p align="center"><img width="450" src="Images_Tugas3/3_informasi.png"></p>
+
+- __Manajemen Proses__
+
+    Contohnya adalah saat membuka aplikasi Adobe Photoshop maka sistem juga akan meload fitur-fitur yang ada directori penyimpanan aplikasi tersebut, seperti ekstensi tambahan yang ada di photoshop.
+
+    <p align="center"><img width="450" src="Images_Tugas3/3_proses.png"></p>
+
+- __Manajemen Sistem Berkas__
+
+    Contoh dari System Call Manajemen Sistem Berkas adalah mengubah atribut berkas, misal kita merubah nama berkas dengan _klik kanan -> rename_.
+
+    <p align="center"><img width="450" src="Images_Tugas3/3_berkas.png"></p>
+
+    <p align="center"><img width="450" src="Images_Tugas3/3_berkas a.png"></p>
